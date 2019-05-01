@@ -118,14 +118,26 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
   }
 }
 
-// /****
-//   Fill this in.
+/****
+  Fill this in.
 
-//   Don't forget to free any malloc'ed memory!
-//  ****/
-// void hash_table_remove(BasicHashTable *ht, char *key)
-// {
-// }
+  Don't forget to free any malloc'ed memory!
+ ****/
+void hash_table_remove(BasicHashTable *ht, char *key)
+{
+  unsigned int key_index = hash(key, ht->capacity);
+  if (ht->storage[key_index]->key == key)
+  {
+    // index exists and keys match
+    Pair *oldPair = ht->storage[key_index];
+    ht->storage[key_index] = NULL;
+    free(oldPair);
+  }
+  else
+  {
+    perror("key not found");
+  }
+}
 
 /****
   Fill this in.
@@ -137,7 +149,6 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
   unsigned int key_index = hash(key, ht->capacity);
   if (ht->storage[key_index] == NULL)
   {
-    // nothing here!
     return NULL;
   }
   else
@@ -146,14 +157,19 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
   }
 }
 
-// /****
-//   Fill this in.
+/****
+  Fill this in.
 
-//   Don't forget to free any malloc'ed memory!
-//  ****/
-// void destroy_hash_table(BasicHashTable *ht)
-// {
-// }
+  Don't forget to free any malloc'ed memory!
+ ****/
+void destroy_hash_table(BasicHashTable *ht)
+{
+  for (int i = 0; i <= ht->capacity; i++)
+  {
+    free(ht->storage[i]);
+  }
+  free(ht);
+}
 
 #ifndef TESTING
 int main(void)
@@ -164,18 +180,18 @@ int main(void)
 
   printf("%s", hash_table_retrieve(ht, "line"));
   printf("%s \n", hash_table_retrieve(ht, "li"));
-  // hash_table_remove(ht, "line");
+  hash_table_remove(ht, "line");
 
-  // if (hash_table_retrieve(ht, "line") == NULL)
-  // {
-  //   printf("...gone tomorrow. (success)\n");
-  // }
-  // else
-  // {
-  //   fprintf(stderr, "ERROR: STILL HERE\n");
-  // }
+  if (hash_table_retrieve(ht, "line") == NULL)
+  {
+    printf("...gone tomorrow. (success)\n");
+  }
+  else
+  {
+    fprintf(stderr, "ERROR: STILL HERE\n");
+  }
 
-  // destroy_hash_table(ht);
+  destroy_hash_table(ht);
 
   return 0;
 }
