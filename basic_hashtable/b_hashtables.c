@@ -101,7 +101,7 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
   }
   else
   {
-    if (ht->storage[key_index]->key == pair->key)
+    if (strcmp(ht->storage[key_index]->key, pair->key) == 0)
     {
       //same key just overwrite value
       ht->storage[key_index] = pair;
@@ -126,7 +126,7 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
 void hash_table_remove(BasicHashTable *ht, char *key)
 {
   unsigned int key_index = hash(key, ht->capacity);
-  if (ht->storage[key_index]->key == key)
+  if (strcmp(ht->storage[key_index]->key, key) == 0)
   {
     // index exists and keys match
     Pair *oldPair = ht->storage[key_index];
@@ -166,7 +166,10 @@ void destroy_hash_table(BasicHashTable *ht)
 {
   for (int i = 0; i <= ht->capacity; i++)
   {
-    free(ht->storage[i]);
+    if (ht->storage[i] != NULL)
+    {
+      free(ht->storage[i]);
+    }
   }
   free(ht);
 }
@@ -180,6 +183,10 @@ int main(void)
 
   printf("%s", hash_table_retrieve(ht, "line"));
   printf("%s \n", hash_table_retrieve(ht, "li"));
+
+  hash_table_insert(ht, "line", "GONE GONE OGNE\n");
+  printf("%s", hash_table_retrieve(ht, "line"));
+
   hash_table_remove(ht, "line");
 
   if (hash_table_retrieve(ht, "line") == NULL)
