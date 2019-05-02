@@ -199,7 +199,6 @@ char *hash_table_retrieve(HashTable *ht, char *key)
       {
         return current->value;
       }
-
       current = current->next;
     }
     perror("key not found");
@@ -207,29 +206,66 @@ char *hash_table_retrieve(HashTable *ht, char *key)
   }
 }
 
-// /*
-//   Fill this in.
+/*
+  Fill this in.
 
-//   Don't forget to free any malloc'ed memory!
-//  */
-// void destroy_hash_table(HashTable *ht)
-// {
-// }
+  Don't forget to free any malloc'ed memory!
+ */
+void destroy_hash_table(HashTable *ht)
+{
+  for (int i = 0; i <= ht->capacity; i++)
+  {
+    if (ht->storage[i] != NULL)
+    {
+      LinkedPair *current = ht->storage[i];
+      LinkedPair *toDelete = NULL;
+      //search LL for matching key
+      while (current)
+      {
+        toDelete = current;
+        current = current->next;
+        free(toDelete);
+      }
+      free(ht->storage[i]);
+    }
+  }
+  free(ht);
+}
 
-// /*
-//   Fill this in.
+/*
+  Fill this in.
 
-//   Should create a new hash table with double the capacity
-//   of the original and copy all elements into the new hash table.
+  Should create a new hash table with double the capacity
+  of the original and copy all elements into the new hash table.
 
-//   Don't forget to free any malloc'ed memory!
-//  */
-// HashTable *hash_table_resize(HashTable *ht)
-// {
-//   HashTable *new_ht;
+  Don't forget to free any malloc'ed memory!
+ */
+HashTable *hash_table_resize(HashTable *ht)
+{
+  HashTable *new_ht = create_hash_table(ht->capacity * 2);
 
-//   return new_ht;
-// }
+  // go thorugh old hash table indexs and LLs, insert every element to new hash table
+
+  for (int i = 0; i <= ht->capacity; i++)
+  {
+    if (ht->storage[i] != NULL)
+    {
+      LinkedPair *current = ht->storage[i];
+      LinkedPair *toInsert = NULL;
+      while (current)
+      {
+        toInsert = current;
+        current = current->next;
+        // toInsert->next = NULL;
+        hash_table_insert(new_ht, toInsert->key, toInsert->value);
+        free(toInsert);
+      }
+    }
+  }
+  free(ht);
+
+  return new_ht;
+}
 
 #ifndef TESTING
 int main(void)
@@ -244,13 +280,13 @@ int main(void)
   printf("%s", hash_table_retrieve(ht, "line_2"));
   printf("%s", hash_table_retrieve(ht, "line_3"));
 
-  // int old_capacity = ht->capacity;
-  // ht = hash_table_resize(ht);
-  // int new_capacity = ht->capacity;
+  int old_capacity = ht->capacity;
+  ht = hash_table_resize(ht);
+  int new_capacity = ht->capacity;
 
-  // printf("\nResizing hash table from %d to %d.\n", old_capacity, new_capacity);
+  printf("\nResizing hash table from %d to %d.\n", old_capacity, new_capacity);
 
-  // destroy_hash_table(ht);
+  destroy_hash_table(ht);
 
   return 0;
 }
