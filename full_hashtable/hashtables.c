@@ -23,6 +23,7 @@ typedef struct HashTable
 {
   int capacity;
   LinkedPair **storage;
+  int size;
 } HashTable;
 
 /*
@@ -31,6 +32,8 @@ typedef struct HashTable
 LinkedPair *create_pair(char *key, char *value)
 {
   LinkedPair *pair = malloc(sizeof(LinkedPair));
+  pair->key = malloc(strlen(key) * (sizeof(char)));
+  pair->value = malloc(strlen(value) * sizeof(char));
   pair->key = strdup(key);
   pair->value = strdup(value);
   pair->next = NULL;
@@ -96,9 +99,7 @@ HashTable *create_hash_table(int capacity)
  */
 void hash_table_insert(HashTable *ht, char *key, char *value)
 {
-  LinkedPair *newPair = malloc(sizeof(LinkedPair *));
-  newPair->key = key;
-  newPair->value = value;
+  LinkedPair *newPair = create_pair(key, value);
 
   unsigned int key_index = hash(key, ht->capacity);
 
@@ -146,7 +147,7 @@ void hash_table_remove(HashTable *ht, char *key)
     // first element matches key
     LinkedPair *oldPair = ht->storage[key_index];
     ht->storage[key_index] = oldPair->next;
-    free(oldPair);
+    destroy_pair(oldPair);
   }
   else if (ht->storage[key_index]->key)
   {
@@ -159,7 +160,7 @@ void hash_table_remove(HashTable *ht, char *key)
       if (strcmp(current->key, key) == 0)
       {
         prev->next = current->next;
-        free(current);
+        destroy_pair(current);
         return;
       }
       prev = current;
@@ -224,11 +225,11 @@ void destroy_hash_table(HashTable *ht)
       {
         toDelete = current;
         current = current->next;
-        free(toDelete);
+        destroy_pair(toDelete);
       }
-      free(ht->storage[i]);
     }
   }
+  free(ht->storage);
   free(ht);
 }
 
@@ -256,13 +257,13 @@ HashTable *hash_table_resize(HashTable *ht)
       {
         toInsert = current;
         current = current->next;
-        // toInsert->next = NULL;
         hash_table_insert(new_ht, toInsert->key, toInsert->value);
-        free(toInsert);
+        destroy_pair(toInsert);
       }
     }
+    ht->storage[i] = NULL;
   }
-  free(ht);
+  destroy_hash_table(ht);
 
   return new_ht;
 }
