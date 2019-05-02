@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 /*
   Hash table key/value pair with linked list pointer.
 
@@ -84,9 +83,12 @@ HashTable *create_hash_table(int capacity)
   ht = malloc(sizeof(HashTable));
   ht->capacity = capacity;
   ht->storage = calloc(capacity, sizeof(LinkedPair *));
+  ht->size = 0;
 
   return ht;
 }
+
+HashTable *hash_table_resize(HashTable *ht);
 
 /*
   Fill this in.
@@ -99,6 +101,7 @@ HashTable *create_hash_table(int capacity)
  */
 void hash_table_insert(HashTable *ht, char *key, char *value)
 {
+
   LinkedPair *newPair = create_pair(key, value);
 
   unsigned int key_index = hash(key, ht->capacity);
@@ -129,6 +132,15 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
       prev->next = newPair;
     }
   }
+  ht->size += 1;
+
+  // resize check for stretch
+  // if (ht->size > 0.7 * ht->capacity)
+  // {
+  //   printf("should resize...\n");
+  //  // has issues with segmentation.. hrm...
+  //   // ht = hash_table_resize(ht);
+  // }
 }
 
 /*
@@ -148,6 +160,8 @@ void hash_table_remove(HashTable *ht, char *key)
     LinkedPair *oldPair = ht->storage[key_index];
     ht->storage[key_index] = oldPair->next;
     destroy_pair(oldPair);
+    ht->size -= 1;
+    return;
   }
   else if (ht->storage[key_index]->key)
   {
@@ -161,6 +175,7 @@ void hash_table_remove(HashTable *ht, char *key)
       {
         prev->next = current->next;
         destroy_pair(current);
+        ht->size -= 1;
         return;
       }
       prev = current;
@@ -243,6 +258,7 @@ void destroy_hash_table(HashTable *ht)
  */
 HashTable *hash_table_resize(HashTable *ht)
 {
+  printf("resizing...");
   HashTable *new_ht = create_hash_table(ht->capacity * 2);
 
   // go thorugh old hash table indexs and LLs, insert every element to new hash table
